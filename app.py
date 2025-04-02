@@ -1,17 +1,22 @@
+import av
 import cv2
 import streamlit as st
-from streamlit_webrtc import webrtc_streamer, VideoTransformerBase
+from streamlit_webrtc import webrtc_streamer, VideoProcessorBase, RTCConfiguration
 
 st.title("📷 Live Webcam Feed with OpenCV")
 
-class VideoTransformer(VideoTransformerBase):
-    def transform(self, frame):
-        img = frame.to_ndarray(format="bgr24")  # Convert frame to numpy array
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
-        return img  # Return the processed frame
+class VideoProcessor(VideoProcessorBase):
+    def recv(self, frame):
+        img = frame.to_ndarray(format="bgr24")
+
+        return av.VideoFrame.from_ndarray(img, format="bgr24")
+
+rtc_configuration = RTCConfiguration(
+    {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
+)
 
 webrtc_streamer(
-    key="webcam", 
-    video_processor_factory=VideoTransformer,
-    async_processing=True  # ✅ Fix: Asynchronous processing
+    key="webcam",
+    video_processor_factory=VideoProcessor,
+    rtc_configuration=rtc_configuration
 )
