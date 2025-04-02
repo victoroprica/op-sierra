@@ -1,29 +1,16 @@
+import av
 import cv2
 import streamlit as st
-import numpy as np
-import tempfile
+from streamlit_webrtc import webrtc_streamer, VideoTransformerBase
 
-cap = cv2.VideoCapture(0)
+st.title("📷 Live Webcam Feed with OpenCV")
 
-st.title('Test Title')
+# Define a video transformer class
+class VideoTransformer(VideoTransformerBase):
+    def recv(self, frame):
+        img = frame.to_ndarray(format="bgr24")  # Convert frame to numpy array
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
+        return img  # Return the processed frame
 
-frame_placeholder = st.empty()
-
-stop_button_pressed = st.button("Stop")
-
-while cap.isOpened() and not stop_button_pressed:
-
-    ret, frame = cap.read()
-
-    if not ret:
-        st.write("The video capture has ended.")
-        break
-
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-    frame_placeholder.image(frame, channels="RGB")
-
-    if stop_button_pressed:
-        break
-
-cap.release()
+# Initialize WebRTC streamer
+webrtc_streamer(key="webcam", video_processor_factory=VideoTransformer)
