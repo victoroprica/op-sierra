@@ -18,5 +18,6 @@ rtc_configuration = RTCConfiguration(
 webrtc_streamer(
     key="webcam",
     video_processor_factory=VideoProcessor,
-    rtc_configuration=rtc_configuration
+    rtc_configuration=rtc_configuration,
+    audio_processor_factory=None
 )
